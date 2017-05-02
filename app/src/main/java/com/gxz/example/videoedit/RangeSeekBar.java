@@ -204,6 +204,8 @@ public class RangeSeekBar extends View {
                 setPressed(false);
                 invalidate();
                 if (listener != null) {
+                    Log.e(TAG, "min: " + normalizedMinValue + ", max: " + normalizedMaxValue);
+                    Log.e(TAG, "duration: " + absoluteMaxValuePrim + ", max: " + normalizedToValue(normalizedMaxValueTime));
                     listener.onRangeSeekBarValuesChanged(this,
                             normalizedToValue(normalizedMinValueTime),
                             normalizedToValue(normalizedMaxValueTime),
@@ -252,7 +254,7 @@ public class RangeSeekBar extends View {
             if (getWidth() - screenCoord < (thumbWidth * 2 / 3)) {
                 screenCoord = getWidth();
             }
-            normalizedMaxValueTime = Math.min(1d, Math.max(0d, (screenCoord - minLength + min_width) / getValueLength()));
+            normalizedMaxValueTime = Math.min(1d, Math.max(0d, (screenCoord - 2 * thumbWidth) / getValueLength()));
         }
         return Math.min(1d, Math.max(0d, screenCoord / getWidth()));
     }

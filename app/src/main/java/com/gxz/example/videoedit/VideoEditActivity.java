@@ -2,10 +2,12 @@ package com.gxz.example.videoedit;
 
 import android.animation.ValueAnimator;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,9 +17,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -62,6 +66,8 @@ public class VideoEditActivity extends AppCompatActivity {
     private int lastScrollX;
     private boolean isSeeking;
 
+    private Button btn_save;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,10 +76,13 @@ public class VideoEditActivity extends AppCompatActivity {
         initView();
         initEditVideo();
         initPlay();
+
+        PermissionUtils.checkPermissions(this);
     }
 
     private void initData() {
         path = Environment.getExternalStorageDirectory() + "/Movies/sr-new.mp4";
+//        path = Environment.getExternalStorageDirectory() + "/MP4_20170502_155322.mp4";
 
         //for video check
         if (!new File(path).exists()) {
@@ -103,6 +112,42 @@ public class VideoEditActivity extends AppCompatActivity {
         videoEditAdapter = new VideoEditAdapter(this,
                 mMaxWidth / MAX_COUNT_RANGE);
         mRecyclerView.setAdapter(videoEditAdapter);
+        btn_save = (Button) findViewById(R.id.btn_save);
+        btn_save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            TrimVideoUtils.startTrim(new File(path), Environment.getExternalStorageDirectory().toString().concat(File.separator), leftProgress, rightProgress, new OnTrimVideoListener() {
+                                @Override
+                                public void onTrimStarted() {
+
+                                }
+
+                                @Override
+                                public void getResult(Uri uri) {
+
+                                }
+
+                                @Override
+                                public void cancelAction() {
+
+                                }
+
+                                @Override
+                                public void onError(String message) {
+
+                                }
+                            });
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
+            }
+        });
         //mRecyclerView.addOnScrollListener(mOnScrollListener);
     }
 
@@ -132,10 +177,7 @@ public class VideoEditActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         if(!isSeeking){
-
-                                    videoProgressUpdate();
-
-
+                            videoProgressUpdate();
                         }
                     }
                 }, 0l, 1000l);
@@ -335,8 +377,14 @@ public class VideoEditActivity extends AppCompatActivity {
         }
         int extractW = mMaxWidth / MAX_COUNT_RANGE;
         int extractH = seekBar.getMeasuredHeight();
+
         mExtractFrameWorkThread = new ExtractFrameWorkThread(extractW, extractH, mUIHandler, path, OutPutFileDirPath, 0, duration, MAX_COUNT_RANGE);
         mExtractFrameWorkThread.start();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        PermissionUtils.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
     }
 
     @Override
