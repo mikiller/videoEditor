@@ -3,6 +3,7 @@ package com.uilib.videoeditor;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Message;
@@ -31,7 +32,7 @@ public class VideoEditor extends FrameLayout {
     private RangeSeekBar seekBar;
     private VideoEditAdapter videoEditAdapter;
 
-    private int MAX_COUNT_RANGE = 10;
+    private int maxThumbCount = 10;
     private double mMaxWidth;
     private double thumbWidth;
     private double averagePxMs;//每毫秒所占的px
@@ -65,15 +66,16 @@ public class VideoEditor extends FrameLayout {
         if (attrs == null)
             return;
         TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.VideoEditor);
-        setMinTrimMs(ta.getInteger(R.styleable.VideoEditor_min_TrimMs, 3000));
-        if (ta.getDrawable(R.styleable.VideoEditor_left_Thumb) != null) {
-            setLeftThumb(ta.getDrawable(R.styleable.VideoEditor_left_Thumb));
+        setMinTrimMs(ta.getInteger(R.styleable.VideoEditor_minTrimMs, 3000));
+        if (ta.getDrawable(R.styleable.VideoEditor_leftThumb) != null) {
+            setLeftThumb(ta.getDrawable(R.styleable.VideoEditor_leftThumb));
         }
-        if (ta.getDrawable(R.styleable.VideoEditor_right_Thumb) != null) {
-            setRightThumb(ta.getDrawable(R.styleable.VideoEditor_right_Thumb));
+        if (ta.getDrawable(R.styleable.VideoEditor_rightThumb) != null) {
+            setRightThumb(ta.getDrawable(R.styleable.VideoEditor_rightThumb));
         }
-        thumbWidth = ta.getDimension(R.styleable.VideoEditor_thumb_Width, 64.0f);
+        thumbWidth = ta.getDimension(R.styleable.VideoEditor_thumbWidth, 64.0f);
         setThumbWidth(thumbWidth);
+        setBorderColor(ta.getColor(R.styleable.VideoEditor_borderColor, Color.parseColor("#00befa")));
         OutPutFileDirPath = PictureUtils.getSaveEditThumbnailDir(context);
     }
 
@@ -97,6 +99,10 @@ public class VideoEditor extends FrameLayout {
         seekBar.setRightThumb(drawable);
     }
 
+    public void setBorderColor(int color){
+        seekBar.setBorderColor(color);
+    }
+
     public void setFilePath(String path) {
         filePath = path;
         extractVideoInfoUtil = new ExtractVideoInfoUtil(path);
@@ -104,8 +110,8 @@ public class VideoEditor extends FrameLayout {
         leftProgress = 0;
         rightProgress = duration;
         seekBar.setMaxTrimMs(duration);
-        seekBar.setSelectValue(RangeSeekBar.MIN, 0);
-        seekBar.setSelectValue(RangeSeekBar.MAX, duration);
+        seekBar.setThubmPos(RangeSeekBar.MIN, 0);
+        seekBar.setThubmPos(RangeSeekBar.MAX, duration);
     }
 
     public void setSeekListener(final RangeSeekBar.OnRangeSeekBarChangeListener listener) {
@@ -134,17 +140,17 @@ public class VideoEditor extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        rcv_thumb.addItemDecoration(new EditSpacingItemDecoration(seekBar.getThumbWidth(), MAX_COUNT_RANGE));
+        //rcv_thumb.addItemDecoration(new EditSpacingItemDecoration(seekBar.getThumbWidth(), maxThumbCount));
         mMaxWidth = seekBar.getValueLength();
         averagePxMs = (mMaxWidth * 1.0f / duration);
         videoEditAdapter = new VideoEditAdapter(mContext,
-                (int) (mMaxWidth / MAX_COUNT_RANGE));
+                (int) (mMaxWidth / maxThumbCount));
         rcv_thumb.setAdapter(videoEditAdapter);
-        int extractW = (int) (mMaxWidth / MAX_COUNT_RANGE);
+        int extractW = (int) (mMaxWidth / maxThumbCount);
         int extractH = getMeasuredHeight();
 
         if (mExtractFrameWorkThread == null) {
-            mExtractFrameWorkThread = new ExtractFrameWorkThread(extractW, extractH, new MainHandler(), filePath, OutPutFileDirPath, 0, duration, MAX_COUNT_RANGE);
+            mExtractFrameWorkThread = new ExtractFrameWorkThread(extractW, extractH, new MainHandler(), filePath, OutPutFileDirPath, 0, duration, maxThumbCount);
             mExtractFrameWorkThread.start();
         }
     }

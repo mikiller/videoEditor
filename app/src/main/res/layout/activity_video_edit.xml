@@ -30,48 +30,11 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="55dp"
         android:layout_marginTop="10dp"
-        seek:left_Thumb="@drawable/selector_seekbar_left"
-        seek:right_Thumb="@drawable/selector_seekbar_right"
-        seek:thumb_Width="21dp"
-        seek:min_TrimMs="3000"/>
-    <!--<FrameLayout-->
-        <!--android:id="@+id/layout_bottom"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="55dp"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_marginBottom="55dp"-->
-        <!--android:layout_marginTop="10dp">-->
-
-        <!--<android.support.v7.widget.RecyclerView-->
-            <!--android:id="@+id/id_rv_id"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent" />-->
-
-        <!--<ImageView-->
-            <!--android:id="@+id/positionIcon"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:src="@drawable/lf_ugc_publish_pos" />-->
-
-        <!--<com.uilib.videoeditor.RangeSeekBar-->
-            <!--android:id="@+id/id_seekBarLayout"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="match_parent"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:orientation="vertical"-->
-            <!--seek:thumbWidth="21dp"-->
-            <!--seek:minTrimMs="3000"-->
-            <!--seek:leftThumb="@drawable/selector_seekbar_left"-->
-            <!--seek:rightThumb="@drawable/rseekbar"/>-->
-        <!--&lt;!&ndash;<LinearLayout&ndash;&gt;-->
-            <!--&lt;!&ndash;android:id="@+id/id_seekBarLayout"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:layout_centerVertical="true"&ndash;&gt;-->
-            <!--&lt;!&ndash;android:orientation="vertical" />&ndash;&gt;-->
-
-    <!--</FrameLayout>-->
+        seek:leftThumb="@drawable/selector_seekbar_left"
+        seek:rightThumb="@drawable/selector_seekbar_right"
+        seek:thumbWidth="21dp"
+        seek:minTrimMs="3000"
+        seek:borderColor="@color/seekbar_border"/>
 
 
     <LinearLayout

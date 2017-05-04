@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <attr name="minTrimMs" format="integer"/>
+    <attr name="thumbWidth" format="dimension" />
+    <attr name="leftThumb" format="reference" />
+    <attr name="rightThumb" format="reference" />
+    <attr name="borderColor" format="color|reference" />
+
     <declare-styleable name="RangeSeekBar">
-        <attr name="minTrimMs" format="integer"/>
-        <attr name="thumbWidth" format="dimension" />
-        <attr name="leftThumb" format="reference" />
-        <attr name="rightThumb" format="reference" />
+        <attr name="minTrimMs"/>
+        <attr name="thumbWidth"/>
+        <attr name="leftThumb"/>
+        <attr name="rightThumb"/>
+        <attr name="borderColor"/>
     </declare-styleable>
 
     <declare-styleable name="VideoEditor">
-        <attr name="min_TrimMs" format="integer"/>
-        <attr name="thumb_Width" format="dimension" />
-        <attr name="left_Thumb" format="reference" />
-        <attr name="right_Thumb" format="reference" />
-        <attr name="max_ThumbCount" format="integer" />
-
+        <attr name="minTrimMs"/>
+        <attr name="thumbWidth"/>
+        <attr name="leftThumb"/>
+        <attr name="rightThumb"/>
+        <attr name="borderColor" />
+        <attr name="maxThumbCount" format="integer" />
     </declare-styleable>
 </resources>
