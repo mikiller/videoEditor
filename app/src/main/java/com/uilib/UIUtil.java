@@ -1,4 +1,4 @@
-package com.gxz.example.videoedit;
+package com.uilib;
 
 import android.content.Context;
 import android.util.DisplayMetrics;

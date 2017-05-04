@@ -1,4 +1,4 @@
-package com.gxz.example.videoedit;
+package com.uilib.videoeditor;
 
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -6,6 +6,10 @@ import android.media.MediaMetadataRetriever;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+
+import com.uilib.videoeditor.ExtractFrameWorkThread;
+import com.uilib.videoeditor.PictureUtils;
+import com.uilib.videoeditor.VideoEditInfo;
 
 /**
  * ================================================

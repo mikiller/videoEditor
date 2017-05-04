@@ -1,4 +1,4 @@
-package com.gxz.example.videoedit;
+package com.uilib;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.widget.ImageView;
+
+import com.uilib.videoeditor.RangeSeekBar;
 
 import java.io.File;
 import java.math.BigDecimal;

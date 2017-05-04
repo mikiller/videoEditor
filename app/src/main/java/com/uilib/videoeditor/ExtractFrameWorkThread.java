@@ -1,4 +1,4 @@
-package com.gxz.example.videoedit;
+package com.uilib.videoeditor;
 
 import android.os.Handler;
 

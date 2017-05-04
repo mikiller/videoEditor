@@ -1,93 +1,121 @@
-package com.gxz.example.videoedit;
+package com.uilib.videoeditor;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.LinearGradient;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.RectF;
-import android.graphics.Shader;
-import android.os.Build;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.StateSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.uilib.R;
+
 import java.text.DecimalFormat;
-
-
-/**
- * ================================================
- * 作    者：顾修忠-guxiuzhong@youku.com/gfj19900401@163.com
- * 版    本：
- * 创建日期：2017/4/4-下午1:22
- * 描    述：
- * 修订历史：
- * ================================================
- */
 
 public class RangeSeekBar extends View {
     private static final String TAG = RangeSeekBar.class.getSimpleName();
     public static final int MIN = 0, MAX = 1, NONE = -1;
-    private double absoluteMinValuePrim, absoluteMaxValuePrim;
     private double normalizedMinValue = 0d;//点坐标占总长度的比例值，范围从0-1
     private double normalizedMaxValue = 1d;//点坐标占总长度的比例值，范围从0-1
     private double normalizedMinValueTime = 0d;
     private double normalizedMaxValueTime = 1d;// normalized：规格化的--点坐标占总长度的比例值，范围从0-1
 
-    private float CURSOR_MOVE = 0;
-    private long min_cut_time = 3000;
-    private double min_width = 1;//最小裁剪距离
+    private long maxTrimMs;
+    private long minTrimMs = 3000;
+    private double thumbWidth = 64.0;
     private int pressedThumb = NONE;
-    private boolean isActive = false;
+    private int[] state = new int[]{android.R.attr.state_pressed};
+    private Matrix matrix = null;
 
+    private Drawable leftThumb, rightThumb;
     private Bitmap thumbImageLeft;
     private Bitmap thumbImageRight;
     private Bitmap pressedThumbLeft;
     private Bitmap pressedThumbRight;
     private Paint thumbPaint;
     private Paint rectPaint;
-    private Paint cursorPaint;
-    private int thumbWidth = 64;
     private boolean isMin;
 
 
     public RangeSeekBar(Context context) {
         super(context);
+        initView(context, null);
     }
 
     public RangeSeekBar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        initView(context, attrs);
     }
 
     public RangeSeekBar(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        initView(context, attrs);
     }
 
-    public RangeSeekBar(Context context, long absoluteMinValuePrim, long absoluteMaxValuePrim) {
-        super(context);
-        this.absoluteMinValuePrim = absoluteMinValuePrim;
-        this.absoluteMaxValuePrim = absoluteMaxValuePrim;
-        if (checkAbsoluteValue() && (absoluteMaxValuePrim - absoluteMinValuePrim < min_cut_time))
-            min_cut_time = absoluteMaxValuePrim - absoluteMinValuePrim;
+//    public RangeSeekBar(Context context, long maxDuration) {
+//        super(context);
+//        if(maxDuration < 0)
+//            throw new IllegalArgumentException("maxDuration is less than zero!");
+//        this.maxTrimMs = maxDuration;
+//        if(maxTrimMs < minTrimMs)
+//            minTrimMs = maxTrimMs;
+//        setFocusable(true);
+//        setFocusableInTouchMode(true);
+//
+//    }
+
+    private void initView(Context context, AttributeSet attrs){
         setFocusable(true);
         setFocusableInTouchMode(true);
-
+        thumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        rectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        rectPaint.setStyle(Paint.Style.FILL);
+        rectPaint.setColor(Color.parseColor("#00befa"));
+        if(attrs == null)
+            return;
+        TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.RangeSeekBar);
+        minTrimMs = ta.getInteger(R.styleable.RangeSeekBar_minTrimMs, 3000);
+        thumbWidth = ta.getDimension(R.styleable.RangeSeekBar_thumbWidth, 64.0f);
+        leftThumb = ta.getDrawable(R.styleable.RangeSeekBar_leftThumb);
+        rightThumb = ta.getDrawable(R.styleable.RangeSeekBar_rightThumb);
+        ta.recycle();
     }
 
-    private boolean checkAbsoluteValue() {
-        if (absoluteMaxValuePrim - absoluteMinValuePrim <= 0) {
-            absoluteMinValuePrim = 0l;
-            absoluteMaxValuePrim = 1l;
-            return false;
-        } else
-            return true;
+    public void setMaxTrimMs(long duration){
+        if(duration < 0)
+            throw new IllegalArgumentException("maxDuration is less than zero!");
+        maxTrimMs = duration;
+        if(maxTrimMs < minTrimMs)
+            minTrimMs = maxTrimMs;
+    }
+
+    public void setMinTrimMs(long minTrim){
+        minTrimMs = minTrim;
+    }
+
+    public void setThumbWidth(double thumbWidth){
+        this.thumbWidth = thumbWidth;
+    }
+
+    public void setLeftThumb(Drawable drawable){
+        leftThumb = drawable;
+    }
+
+    public void setRightThumb(Drawable drawable){
+        rightThumb = drawable;
     }
 
     @Override
@@ -98,31 +126,56 @@ public class RangeSeekBar extends View {
 
     private void init() {
         //等比例缩放图片
-        thumbImageLeft = BitmapFactory.decodeResource(getResources(), R.drawable.lseekbar);
-        thumbImageRight = BitmapFactory.decodeResource(getResources(), R.drawable.rseekbar);
-        pressedThumbLeft = BitmapFactory.decodeResource(getResources(), R.drawable.lseekbar_selected);
-        pressedThumbRight = BitmapFactory.decodeResource(getResources(), R.drawable.rseekbar_selected);
-        int height = thumbImageLeft.getHeight();
+        if(leftThumb != null) {
+            thumbImageLeft = ((BitmapDrawable) leftThumb.getCurrent()).getBitmap();
+        }
+        if(rightThumb != null){
+            thumbImageRight = ((BitmapDrawable)rightThumb.getCurrent()).getBitmap();
+        }
+        int height = thumbImageLeft != null ? thumbImageLeft.getHeight() : (thumbImageRight != null ? thumbImageRight.getHeight() : getMeasuredHeight());
+        int width = thumbImageLeft != null ? thumbImageLeft.getWidth() : (thumbImageRight != null ? thumbImageRight.getWidth() : (int)thumbWidth);
         int newHeight = getMeasuredHeight();
         float scaleHeight = newHeight * 1.0f / height;
-        Matrix matrix = new Matrix();
-        matrix.postScale(1, scaleHeight);
-        thumbImageLeft = Bitmap.createBitmap(thumbImageLeft, 0, 0, thumbImageLeft.getWidth(), thumbImageLeft.getHeight(), matrix, true);
-        thumbImageRight = Bitmap.createBitmap(thumbImageRight, 0, 0, thumbImageRight.getWidth(), thumbImageRight.getHeight(), matrix, true);
-        pressedThumbLeft = Bitmap.createBitmap(pressedThumbLeft, 0, 0, pressedThumbLeft.getWidth(), pressedThumbLeft.getHeight(), matrix, true);
-        pressedThumbRight = Bitmap.createBitmap(pressedThumbRight, 0, 0, pressedThumbRight.getWidth(), pressedThumbRight.getHeight(), matrix, true);
-        thumbWidth = thumbImageRight.getWidth();
+        float scaleWidth = (float) (thumbWidth / width);
+        matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+        if(thumbImageLeft != null)
+            thumbImageLeft = Bitmap.createBitmap(thumbImageLeft, 0, 0, thumbImageLeft.getWidth(), thumbImageLeft.getHeight(), matrix, true);
+        if(thumbImageRight != null)
+            thumbImageRight = Bitmap.createBitmap(thumbImageRight, 0, 0, thumbImageRight.getWidth(), thumbImageRight.getHeight(), matrix, true);
+    }
 
-        thumbPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        rectPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        rectPaint.setStyle(Paint.Style.FILL);
-        rectPaint.setColor(Color.parseColor("#00befa"));
-        cursorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        cursorPaint.setStyle(Paint.Style.FILL);
-        cursorPaint.setShader(new LinearGradient(0, 0, 0, getMeasuredHeight(),
-                new int[]{Color.parseColor("#75ffd855"), Color.parseColor("#ffd855"), Color.parseColor("#75ffd855")},
-                new float[]{0f, 0.5f, 1f},
-                Shader.TileMode.CLAMP));
+
+    @Override
+    protected int[] onCreateDrawableState(int extraSpace) {
+        int[] drawState = super.onCreateDrawableState(extraSpace + 1);
+        if(isPressed()){
+            mergeDrawableStates(drawState, state);
+        }
+        return drawState;
+    }
+
+    @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        int[] drawableState = getDrawableState();
+        if(matrix == null)
+            return;
+
+        if(pressedThumb != NONE){
+            if(leftThumb != null) {
+                leftThumb.setState(drawableState);
+                pressedThumbLeft = ((BitmapDrawable) leftThumb.getCurrent()).getBitmap();
+                pressedThumbLeft = Bitmap.createBitmap(pressedThumbLeft, 0, 0, pressedThumbLeft.getWidth(), pressedThumbLeft.getHeight(), matrix, true);
+                leftThumb = null;
+            }
+            if(rightThumb != null) {
+                rightThumb.setState(drawableState);
+                pressedThumbRight = ((BitmapDrawable) rightThumb.getCurrent()).getBitmap();
+                pressedThumbRight = Bitmap.createBitmap(pressedThumbRight, 0, 0, pressedThumbRight.getWidth(), pressedThumbRight.getHeight(), matrix, true);
+                rightThumb = null;
+            }
+        }
     }
 
     @Override
@@ -159,12 +212,12 @@ public class RangeSeekBar extends View {
         canvas.drawBitmap(isLeft ?
                         (pressedThumb == MIN ? pressedThumbLeft : thumbImageLeft)
                         : (pressedThumb == MAX ? pressedThumbRight : thumbImageRight),
-                screenCoord - (isLeft ? 0 : thumbWidth), 0, thumbPaint);
+                (float) (screenCoord - (isLeft ? 0 : thumbWidth)), 0, thumbPaint);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (event.getPointerCount() > 1 || absoluteMaxValuePrim <= min_cut_time) {
+        if (event.getPointerCount() > 1 /*|| absoluteMaxValuePrim <= minTrimMs*/) {
             return super.onTouchEvent(event);
         }
 
@@ -201,11 +254,9 @@ public class RangeSeekBar extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 trackTouchEvent(event, pressedThumb);
-                setPressed(false);
+                refreshDrawableState();
                 invalidate();
                 if (listener != null) {
-                    Log.e(TAG, "min: " + normalizedMinValue + ", max: " + normalizedMaxValue);
-                    Log.e(TAG, "duration: " + absoluteMaxValuePrim + ", max: " + normalizedToValue(normalizedMaxValueTime));
                     listener.onRangeSeekBarValuesChanged(this,
                             normalizedToValue(normalizedMinValueTime),
                             normalizedToValue(normalizedMaxValueTime),
@@ -230,15 +281,15 @@ public class RangeSeekBar extends View {
 
     private double screenToNormalized(double screenCoord, int position) {
         isMin = false;
-        double min = min_cut_time / (absoluteMaxValuePrim - absoluteMinValuePrim) * getValueLength();
-        if (absoluteMaxValuePrim > 5 * 60 * 1000) {//大于5分钟的精确小数四位
+        double min = getValueLength() * minTrimMs / maxTrimMs;
+        if (maxTrimMs > 5 * 60 * 1000) {//大于5分钟的精确小数四位
             DecimalFormat df = new DecimalFormat("0.0000");
-            min_width = Double.parseDouble(df.format(min));
+            min = Double.parseDouble(df.format(min));
         } else {
-            min_width = Math.round(min + 0.5d);
+            min = Math.round(min + 0.5d);
         }
 
-        double minLength = 2 * thumbWidth + min_width;
+        double minLength = 2 * thumbWidth + min;
         double maxLength = position == MIN ? Math.abs(minLength - getThumbPosX(normalizedMaxValue)) : Math.abs(minLength + getThumbPosX(normalizedMinValue));
         if (position == MIN ? (screenCoord > maxLength) : (screenCoord < maxLength)) {
             isMin = true;
@@ -259,8 +310,8 @@ public class RangeSeekBar extends View {
         return Math.min(1d, Math.max(0d, screenCoord / getWidth()));
     }
 
-    public int getValueLength() {
-        return (getWidth() - 2 * thumbWidth);
+    public double getValueLength() {
+        return (getMeasuredWidth()*1.0 - 2.0 * thumbWidth);
     }
 
     /**
@@ -300,10 +351,6 @@ public class RangeSeekBar extends View {
         }
     }
 
-    public void setMin_cut_time(long min_cut_time) {
-        this.min_cut_time = min_cut_time;
-    }
-
     private float getThumbPosX(double normalizedCoord) {
         return (float) (getPaddingLeft() + normalizedCoord * (getWidth() - getPaddingLeft() - getPaddingRight()));
     }
@@ -322,7 +369,8 @@ public class RangeSeekBar extends View {
     }
 
     private double valueToNormalized(long value) {
-        return (value - absoluteMinValuePrim) / (absoluteMaxValuePrim - absoluteMinValuePrim);
+//        return (value - absoluteMinValuePrim) / (absoluteMaxValuePrim - absoluteMinValuePrim);
+        return 1.0 * value / maxTrimMs;
     }
 
     public long getSelectedMinValue() {
@@ -334,12 +382,12 @@ public class RangeSeekBar extends View {
     }
 
     private long normalizedToValue(double normalized) {
-        return (long) (absoluteMinValuePrim + normalized
-                * (absoluteMaxValuePrim - absoluteMinValuePrim));
+//        return (long) (absoluteMinValuePrim + normalized * (absoluteMaxValuePrim - absoluteMinValuePrim));
+        return (long) (normalized * maxTrimMs);
     }
 
     public int getThumbWidth(){
-        return thumbWidth;
+        return (int) thumbWidth;
     }
 
     public int dip2px(int dip) {
@@ -376,5 +424,25 @@ public class RangeSeekBar extends View {
 
     public void setOnRangeSeekBarChangeListener(OnRangeSeekBarChangeListener listener) {
         this.listener = listener;
+    }
+
+    public void release(){
+        if(!thumbImageLeft.isRecycled()) {
+            thumbImageLeft.recycle();
+            thumbImageLeft = null;
+        }
+        if(!thumbImageRight.isRecycled()){
+            thumbImageRight.recycle();
+            thumbImageRight = null;
+        }
+        if(!pressedThumbLeft.isRecycled()){
+            pressedThumbLeft.recycle();
+            pressedThumbLeft = null;
+        }
+        if(!pressedThumbRight.isRecycled()){
+            pressedThumbRight.recycle();
+            pressedThumbRight = null;
+        }
+        System.gc();
     }
 }

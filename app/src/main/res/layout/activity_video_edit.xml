@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:seek="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
@@ -10,7 +10,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/layout_bottom"
+        android:layout_above="@+id/videoeditor"
         android:layout_alignParentTop="true">
 
         <VideoView
@@ -19,70 +19,73 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginLeft="35dp"
-            android:layout_marginRight="35dp"
-            />
+            android:layout_marginRight="35dp" />
     </FrameLayout>
 
 
-    <FrameLayout
-        android:id="@+id/layout_bottom"
+    <com.uilib.videoeditor.VideoEditor
+        android:id="@+id/videoeditor"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="55dp"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="10dp"
+        seek:left_Thumb="@drawable/selector_seekbar_left"
+        seek:right_Thumb="@drawable/selector_seekbar_right"
+        seek:thumb_Width="21dp"
+        seek:min_TrimMs="3000"/>
+    <!--<FrameLayout-->
+        <!--android:id="@+id/layout_bottom"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="55dp"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_marginBottom="55dp"-->
+        <!--android:layout_marginTop="10dp">-->
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/id_rv_id"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+        <!--<android.support.v7.widget.RecyclerView-->
+            <!--android:id="@+id/id_rv_id"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="match_parent" />-->
 
-        <ImageView
-            android:id="@+id/positionIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:src="@drawable/lf_ugc_publish_pos"
-            />
+        <!--<ImageView-->
+            <!--android:id="@+id/positionIcon"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:src="@drawable/lf_ugc_publish_pos" />-->
 
-        <!--<LinearLayout-->
+        <!--<com.uilib.videoeditor.RangeSeekBar-->
+            <!--android:id="@+id/id_seekBarLayout"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="match_parent"-->
-            <!--android:orientation="horizontal">-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:orientation="vertical"-->
+            <!--seek:thumbWidth="21dp"-->
+            <!--seek:minTrimMs="3000"-->
+            <!--seek:leftThumb="@drawable/selector_seekbar_left"-->
+            <!--seek:rightThumb="@drawable/rseekbar"/>-->
+        <!--&lt;!&ndash;<LinearLayout&ndash;&gt;-->
+            <!--&lt;!&ndash;android:id="@+id/id_seekBarLayout"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:layout_centerVertical="true"&ndash;&gt;-->
+            <!--&lt;!&ndash;android:orientation="vertical" />&ndash;&gt;-->
 
-            <!--<View-->
-                <!--android:layout_width="35dp"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:background="#66000000"/>-->
-
-            <LinearLayout
-                android:id="@+id/id_seekBarLayout"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_centerVertical="true"
-                android:orientation="vertical"/>
-
-            <!--<View-->
-                <!--android:layout_width="35dp"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:background="#66000000"/>-->
-        <!--</LinearLayout>-->
-    </FrameLayout>
+    <!--</FrameLayout>-->
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:layout_alignParentBottom="true"
-        android:gravity="center">
+        android:gravity="center"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btn_save"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="保存"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
     </LinearLayout>
 </RelativeLayout>

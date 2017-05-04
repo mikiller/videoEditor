@@ -1,4 +1,4 @@
-package com.gxz.example.videoedit;
+package com.uilib.videoeditor;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
+import com.uilib.R;
 
 import java.util.ArrayList;
 import java.util.List;
